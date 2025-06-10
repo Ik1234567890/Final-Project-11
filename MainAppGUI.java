@@ -15,32 +15,54 @@ public class MainAppGUI {
         frame.setSize(500, 400);
         frame.setLayout(new FlowLayout());
 
-        // Auto-load flashcards from file when the app starts
-        deck.loadFromFile("flashcards.txt");
-
         JButton addButton = new JButton("Add Flashcard");
         JButton viewButton = new JButton("View Flashcards");
-        JButton studyButton = new JButton("Study Flashcards");
         JButton saveButton = new JButton("Save Flashcards");
         JButton loadButton = new JButton("Load Flashcards");
+        JButton studyButton = new JButton("Study Flashcards");
 
         addButton.addActionListener(e -> showAddDialog());
+
         viewButton.addActionListener(e -> showFlashcards());
-        studyButton.addActionListener(e -> studyFlashcards());
+
         saveButton.addActionListener(e -> {
             deck.saveToFile("flashcards.txt");
-            JOptionPane.showMessageDialog(null, "Flashcards saved successfully.");
+            JOptionPane.showMessageDialog(null, "Flashcards saved successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         });
+
         loadButton.addActionListener(e -> {
             deck.loadFromFile("flashcards.txt");
-            JOptionPane.showMessageDialog(null, "Flashcards loaded successfully.");
+            // Show flashcards immediately after loading
+            if (deck.getCards().isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No flashcards available after loading.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                StringBuilder builder = new StringBuilder();
+                for (Flashcard card : deck.getCards()) {
+                    builder.append(card.toString()).append("\n\n");
+                }
+                JTextArea textArea = new JTextArea(builder.toString());
+                textArea.setEditable(false);
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(450, 300));
+
+                JOptionPane.showMessageDialog(null, scrollPane, "Loaded Flashcards",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        studyButton.addActionListener(e -> {
+            if (deck.getCards().isEmpty()) {
+                JOptionPane.showMessageDialog(null, "No flashcards to study. Please load or add some first.", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else {
+                studyFlashcards();
+            }
         });
 
         frame.add(addButton);
         frame.add(viewButton);
-        frame.add(studyButton);
         frame.add(saveButton);
         frame.add(loadButton);
+        frame.add(studyButton);
 
         frame.setVisible(true);
     }
@@ -59,23 +81,16 @@ public class MainAppGUI {
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (result == JOptionPane.OK_OPTION) {
-            String question = questionField.getText().trim();
-            String answer = answerField.getText().trim();
-
-            if (question.isEmpty() || answer.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Question and answer cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
+            String question = questionField.getText();
+            String answer = answerField.getText();
             Flashcard card = new Flashcard(question, answer);
             deck.addCard(card);
-            JOptionPane.showMessageDialog(null, "Flashcard added successfully.");
         }
     }
 
     private void showFlashcards() {
         if (deck.getCards().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No flashcards available to display.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No flashcards to display.", "Info", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -94,22 +109,36 @@ public class MainAppGUI {
     }
 
     private void studyFlashcards() {
-        if (deck.getCards().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No flashcards available for study.", "Info", JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
+        // Basic study mode: shows one card at a time with Next button
+        JFrame studyFrame = new JFrame("Study Flashcards");
+        studyFrame.setSize(400, 200);
+        studyFrame.setLayout(new BorderLayout());
 
-        // Simple study mode: Show each question one by one with option to reveal answer
-        for (Flashcard card : deck.getCards()) {
-            int result = JOptionPane.showConfirmDialog(null, card.getQuestion() + "\n\nClick 'Yes' to see the answer.",
-                    "Study Flashcard", JOptionPane.YES_NO_OPTION);
+        JLabel cardLabel = new JLabel("", SwingConstants.CENTER);
+        cardLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        studyFrame.add(cardLabel, BorderLayout.CENTER);
 
-            if (result == JOptionPane.YES_OPTION) {
-                JOptionPane.showMessageDialog(null, "Answer:\n" + card.getAnswer());
-            } else {
-                // User skipped answer reveal, move to next card
-                continue;
+        JButton nextButton = new JButton("Next");
+        studyFrame.add(nextButton, BorderLayout.SOUTH);
+
+        final int[] index = {0};
+        showCard(index[0], cardLabel);
+
+        nextButton.addActionListener(e -> {
+            index[0]++;
+            if (index[0] >= deck.getCards().size()) {
+                JOptionPane.showMessageDialog(studyFrame, "You have reached the end of the flashcards.", "End", JOptionPane.INFORMATION_MESSAGE);
+                index[0] = 0; // restart or close window based on preference
             }
-        }
+            showCard(index[0], cardLabel);
+        });
+
+        studyFrame.setLocationRelativeTo(null);
+        studyFrame.setVisible(true);
+    }
+
+    private void showCard(int index, JLabel label) {
+        Flashcard card = deck.getCards().get(index);
+        label.setText("<html><b>Q:</b> " + card.getQuestion() + "<br><br><b>A:</b> " + card.getAnswer() + "</html>");
     }
 }
