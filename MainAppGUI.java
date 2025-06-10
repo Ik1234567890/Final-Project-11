@@ -4,6 +4,8 @@ import java.awt.event.*;
 
 public class MainAppGUI {
     private FlashcardDeck deck = new FlashcardDeck();
+    private int currentCardIndex = 0;
+    private boolean showingAnswer = false;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainAppGUI().createAndShowGUI());
@@ -16,13 +18,12 @@ public class MainAppGUI {
         frame.setLayout(new FlowLayout());
 
         JButton addButton = new JButton("Add Flashcard");
-        JButton viewButton = new JButton("Study Flashcards");
+        JButton studyButton = new JButton("Study Flashcards");
         JButton saveButton = new JButton("Save Flashcards");
         JButton loadButton = new JButton("Load Flashcards");
 
-        // Action listeners
         addButton.addActionListener(e -> showAddDialog());
-        viewButton.addActionListener(e -> showFlashcards());
+        studyButton.addActionListener(e -> startStudyMode());
         saveButton.addActionListener(e -> {
             deck.saveToFile("flashcards.txt");
             JOptionPane.showMessageDialog(null, "Flashcards saved successfully!");
@@ -31,7 +32,7 @@ public class MainAppGUI {
             deck.loadFromFile("flashcards.txt");
             JOptionPane.showMessageDialog(null, "Flashcards loaded successfully!");
 
-            // Display loaded flashcards in a scrollable window
+            // Optional: preview flashcards after loading
             StringBuilder builder = new StringBuilder();
             for (Flashcard card : deck.getCards()) {
                 builder.append("Q: ").append(card.getQuestion()).append("\n");
@@ -42,13 +43,11 @@ public class MainAppGUI {
             textArea.setEditable(false);
             JScrollPane scrollPane = new JScrollPane(textArea);
             scrollPane.setPreferredSize(new Dimension(450, 300));
-
             JOptionPane.showMessageDialog(null, scrollPane, "Loaded Flashcards", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        // Add buttons to frame
         frame.add(addButton);
-        frame.add(viewButton);
+        frame.add(studyButton);
         frame.add(saveButton);
         frame.add(loadButton);
 
@@ -76,19 +75,49 @@ public class MainAppGUI {
         }
     }
 
-    private void showFlashcards() {
-        StringBuilder builder = new StringBuilder();
-        for (Flashcard card : deck.getCards()) {
-            builder.append("Q: ").append(card.getQuestion()).append("\n");
-            builder.append("A: ").append(card.getAnswer()).append("\n\n");
+    private void startStudyMode() {
+        if (deck.getCards().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No flashcards to study. Please load or add some first.");
+            return;
         }
 
-        JTextArea textArea = new JTextArea(builder.toString());
-        textArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(450, 300));
+        currentCardIndex = 0;
+        showingAnswer = false;
 
-        JOptionPane.showMessageDialog(null, scrollPane, "All Flashcards",
-                JOptionPane.INFORMATION_MESSAGE);
+        JFrame studyFrame = new JFrame("Study Flashcards");
+        studyFrame.setSize(400, 200);
+        studyFrame.setLayout(new BorderLayout());
+
+        JLabel cardLabel = new JLabel(deck.getCards().get(currentCardIndex).getQuestion(), SwingConstants.CENTER);
+        JButton showAnswerButton = new JButton("Show Answer");
+        JButton nextButton = new JButton("Next");
+
+        showAnswerButton.addActionListener(e -> {
+            if (!showingAnswer) {
+                cardLabel.setText(deck.getCards().get(currentCardIndex).getAnswer());
+                showingAnswer = true;
+            }
+        });
+
+        nextButton.addActionListener(e -> {
+            currentCardIndex++;
+            if (currentCardIndex >= deck.getCards().size()) {
+                JOptionPane.showMessageDialog(studyFrame, "You’ve finished all flashcards!");
+                studyFrame.dispose();
+            } else {
+                cardLabel.setText(deck.getCards().get(currentCardIndex).getQuestion());
+                showingAnswer = false;
+            }
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(showAnswerButton);
+        buttonPanel.add(nextButton);
+
+        studyFrame.add(cardLabel, BorderLayout.CENTER);
+        studyFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+        studyFrame.setLocationRelativeTo(null);
+        studyFrame.setVisible(true);
     }
 }
