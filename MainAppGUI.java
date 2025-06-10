@@ -32,7 +32,6 @@ public class MainAppGUI {
 
         loadButton.addActionListener(e -> {
             deck.loadFromFile("flashcards.txt");
-            // Show flashcards immediately after loading
             if (deck.getCards().isEmpty()) {
                 JOptionPane.showMessageDialog(null, "No flashcards available after loading.", "Info", JOptionPane.INFORMATION_MESSAGE);
             } else {
@@ -109,7 +108,6 @@ public class MainAppGUI {
     }
 
     private void studyFlashcards() {
-        // Basic study mode: shows one card at a time with Next button
         JFrame studyFrame = new JFrame("Study Flashcards");
         studyFrame.setSize(400, 200);
         studyFrame.setLayout(new BorderLayout());
@@ -118,27 +116,35 @@ public class MainAppGUI {
         cardLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         studyFrame.add(cardLabel, BorderLayout.CENTER);
 
-        JButton nextButton = new JButton("Next");
+        JButton nextButton = new JButton("Show Answer");
         studyFrame.add(nextButton, BorderLayout.SOUTH);
 
         final int[] index = {0};
-        showCard(index[0], cardLabel);
+        final boolean[] showingQuestion = {true};
+
+        // Show the question first
+        cardLabel.setText("<html><b>Q:</b> " + deck.getCards().get(index[0]).getQuestion() + "</html>");
 
         nextButton.addActionListener(e -> {
-            index[0]++;
-            if (index[0] >= deck.getCards().size()) {
-                JOptionPane.showMessageDialog(studyFrame, "You have reached the end of the flashcards.", "End", JOptionPane.INFORMATION_MESSAGE);
-                index[0] = 0; // restart or close window based on preference
+            if (showingQuestion[0]) {
+                // Show answer
+                cardLabel.setText("<html><b>A:</b> " + deck.getCards().get(index[0]).getAnswer() + "</html>");
+                nextButton.setText("Next Card");
+                showingQuestion[0] = false;
+            } else {
+                // Move to next card or wrap around
+                index[0]++;
+                if (index[0] >= deck.getCards().size()) {
+                    JOptionPane.showMessageDialog(studyFrame, "You have reached the end of the flashcards.", "End", JOptionPane.INFORMATION_MESSAGE);
+                    index[0] = 0; // restart from first card
+                }
+                cardLabel.setText("<html><b>Q:</b> " + deck.getCards().get(index[0]).getQuestion() + "</html>");
+                nextButton.setText("Show Answer");
+                showingQuestion[0] = true;
             }
-            showCard(index[0], cardLabel);
         });
 
         studyFrame.setLocationRelativeTo(null);
         studyFrame.setVisible(true);
-    }
-
-    private void showCard(int index, JLabel label) {
-        Flashcard card = deck.getCards().get(index);
-        label.setText("<html><b>Q:</b> " + card.getQuestion() + "<br><br><b>A:</b> " + card.getAnswer() + "</html>");
     }
 }
