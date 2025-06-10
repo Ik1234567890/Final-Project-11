@@ -29,7 +29,7 @@ public class MainAppGUI {
         loadButton.addActionListener(e -> {
             deck.loadFromFile("flashcards.txt");
             JOptionPane.showMessageDialog(null, "Flashcards loaded successfully!");
-            showFlashcards();  // Show loaded flashcards right after loading
+            showFlashcards();  // Display them after loading
         });
 
         frame.add(addButton);
