@@ -30,6 +30,14 @@ public class MainAppGUI {
         frame.add(saveButton);
         frame.add(loadButton);
 
+        // Auto-save flashcards when window is closing
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                deck.saveToFile("flashcards.txt");
+            }
+        });
+
         frame.setVisible(true);
     }
 
@@ -47,10 +55,15 @@ public class MainAppGUI {
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (result == JOptionPane.OK_OPTION) {
-            String question = questionField.getText();
-            String answer = answerField.getText();
-            Flashcard card = new Flashcard(question, answer);
-            deck.addCard(card);
+            String question = questionField.getText().trim();
+            String answer = answerField.getText().trim();
+            if (!question.isEmpty() && !answer.isEmpty()) {
+                Flashcard card = new Flashcard(question, answer);
+                deck.addCard(card);
+            } else {
+                JOptionPane.showMessageDialog(null, "Question and Answer cannot be empty.",
+                        "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
