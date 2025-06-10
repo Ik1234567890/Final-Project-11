@@ -4,8 +4,6 @@ import java.awt.event.*;
 
 public class MainAppGUI {
     private FlashcardDeck deck = new FlashcardDeck();
-    private int currentCardIndex = 0;
-    private boolean showingAnswer = false;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainAppGUI().createAndShowGUI());
@@ -17,36 +15,29 @@ public class MainAppGUI {
         frame.setSize(500, 400);
         frame.setLayout(new FlowLayout());
 
+        // Auto-load flashcards from file when the app starts
+        deck.loadFromFile("flashcards.txt");
+
         JButton addButton = new JButton("Add Flashcard");
+        JButton viewButton = new JButton("View Flashcards");
         JButton studyButton = new JButton("Study Flashcards");
         JButton saveButton = new JButton("Save Flashcards");
         JButton loadButton = new JButton("Load Flashcards");
 
         addButton.addActionListener(e -> showAddDialog());
-        studyButton.addActionListener(e -> startStudyMode());
+        viewButton.addActionListener(e -> showFlashcards());
+        studyButton.addActionListener(e -> studyFlashcards());
         saveButton.addActionListener(e -> {
             deck.saveToFile("flashcards.txt");
-            JOptionPane.showMessageDialog(null, "Flashcards saved successfully!");
+            JOptionPane.showMessageDialog(null, "Flashcards saved successfully.");
         });
         loadButton.addActionListener(e -> {
             deck.loadFromFile("flashcards.txt");
-            JOptionPane.showMessageDialog(null, "Flashcards loaded successfully!");
-
-            // Optional: preview flashcards after loading
-            StringBuilder builder = new StringBuilder();
-            for (Flashcard card : deck.getCards()) {
-                builder.append("Q: ").append(card.getQuestion()).append("\n");
-                builder.append("A: ").append(card.getAnswer()).append("\n\n");
-            }
-
-            JTextArea textArea = new JTextArea(builder.toString());
-            textArea.setEditable(false);
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            scrollPane.setPreferredSize(new Dimension(450, 300));
-            JOptionPane.showMessageDialog(null, scrollPane, "Loaded Flashcards", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Flashcards loaded successfully.");
         });
 
         frame.add(addButton);
+        frame.add(viewButton);
         frame.add(studyButton);
         frame.add(saveButton);
         frame.add(loadButton);
@@ -68,57 +59,57 @@ public class MainAppGUI {
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (result == JOptionPane.OK_OPTION) {
-            String question = questionField.getText();
-            String answer = answerField.getText();
+            String question = questionField.getText().trim();
+            String answer = answerField.getText().trim();
+
+            if (question.isEmpty() || answer.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Question and answer cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             Flashcard card = new Flashcard(question, answer);
             deck.addCard(card);
+            JOptionPane.showMessageDialog(null, "Flashcard added successfully.");
         }
     }
 
-    private void startStudyMode() {
+    private void showFlashcards() {
         if (deck.getCards().isEmpty()) {
-JLabel message = new JLabel("<html><body style='width: 300px;'>No flashcards to study.<br>Please load or add some first.</body></html>");
-JOptionPane.showMessageDialog(null, message, "No Flashcards", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No flashcards available to display.", "Info", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
-        currentCardIndex = 0;
-        showingAnswer = false;
+        StringBuilder builder = new StringBuilder();
+        for (Flashcard card : deck.getCards()) {
+            builder.append(card.toString()).append("\n\n");
+        }
 
-        JFrame studyFrame = new JFrame("Study Flashcards");
-        studyFrame.setSize(400, 200);
-        studyFrame.setLayout(new BorderLayout());
+        JTextArea textArea = new JTextArea(builder.toString());
+        textArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(450, 300));
 
-        JLabel cardLabel = new JLabel(deck.getCards().get(currentCardIndex).getQuestion(), SwingConstants.CENTER);
-        JButton showAnswerButton = new JButton("Show Answer");
-        JButton nextButton = new JButton("Next");
+        JOptionPane.showMessageDialog(null, scrollPane, "All Flashcards",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
 
-        showAnswerButton.addActionListener(e -> {
-            if (!showingAnswer) {
-                cardLabel.setText(deck.getCards().get(currentCardIndex).getAnswer());
-                showingAnswer = true;
-            }
-        });
+    private void studyFlashcards() {
+        if (deck.getCards().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "No flashcards available for study.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
 
-        nextButton.addActionListener(e -> {
-            currentCardIndex++;
-            if (currentCardIndex >= deck.getCards().size()) {
-                JOptionPane.showMessageDialog(studyFrame, "You’ve finished all flashcards!");
-                studyFrame.dispose();
+        // Simple study mode: Show each question one by one with option to reveal answer
+        for (Flashcard card : deck.getCards()) {
+            int result = JOptionPane.showConfirmDialog(null, card.getQuestion() + "\n\nClick 'Yes' to see the answer.",
+                    "Study Flashcard", JOptionPane.YES_NO_OPTION);
+
+            if (result == JOptionPane.YES_OPTION) {
+                JOptionPane.showMessageDialog(null, "Answer:\n" + card.getAnswer());
             } else {
-                cardLabel.setText(deck.getCards().get(currentCardIndex).getQuestion());
-                showingAnswer = false;
+                // User skipped answer reveal, move to next card
+                continue;
             }
-        });
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(showAnswerButton);
-        buttonPanel.add(nextButton);
-
-        studyFrame.add(cardLabel, BorderLayout.CENTER);
-        studyFrame.add(buttonPanel, BorderLayout.SOUTH);
-
-        studyFrame.setLocationRelativeTo(null);
-        studyFrame.setVisible(true);
+        }
     }
 }
