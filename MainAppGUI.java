@@ -77,7 +77,8 @@ public class MainAppGUI {
 
     private void startStudyMode() {
         if (deck.getCards().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No flashcards to study. Please load or add some first.");
+JLabel message = new JLabel("<html><body style='width: 300px;'>No flashcards to study.<br>Please load or add some first.</body></html>");
+JOptionPane.showMessageDialog(null, message, "No Flashcards", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
