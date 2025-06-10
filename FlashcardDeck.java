@@ -27,21 +27,21 @@ public class FlashcardDeck {
         }
     }
 
-    public void loadFromFile(String filename) {
-        flashcards.clear();
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",", 2);
-                if (parts.length == 2) {
-                    String question = parts[0].trim();
-                    String answer = parts[1].trim();
-                    Flashcard card = new Flashcard(question, answer);
-                    flashcards.add(card);
-                }
+   public void loadFromFile(String filename) {
+    flashcards.clear();
+    try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            System.out.println("READ LINE: " + line); // debug
+            String[] parts = line.split(",", 2); // only split on the first comma
+            if (parts.length == 2) {
+                Flashcard card = new Flashcard(parts[0].trim(), parts[1].trim());
+                flashcards.add(card);
+            } else {
+                System.out.println("SKIPPED MALFORMED LINE: " + line);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+    } catch (IOException e) {
+        e.printStackTrace();
     }
 }
