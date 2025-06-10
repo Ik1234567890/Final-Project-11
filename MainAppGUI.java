@@ -22,14 +22,17 @@ public class MainAppGUI {
 
         addButton.addActionListener(e -> showAddDialog());
         viewButton.addActionListener(e -> showFlashcards());
+
+        // ✅ Updated save button with success message
         saveButton.addActionListener(e -> {
             deck.saveToFile("flashcards.txt");
             JOptionPane.showMessageDialog(null, "Flashcards saved successfully!");
         });
+
         loadButton.addActionListener(e -> {
             deck.loadFromFile("flashcards.txt");
             JOptionPane.showMessageDialog(null, "Flashcards loaded successfully!");
-            showFlashcards();  // Display them after loading
+            showFlashcards(); // Display loaded cards
         });
 
         frame.add(addButton);
