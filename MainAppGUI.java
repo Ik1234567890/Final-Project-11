@@ -24,17 +24,12 @@ public class MainAppGUI {
         viewButton.addActionListener(e -> showFlashcards());
         saveButton.addActionListener(e -> {
             deck.saveToFile("flashcards.txt");
-            JOptionPane.showMessageDialog(null, "Flashcards saved successfully.");
+            JOptionPane.showMessageDialog(null, "Flashcards saved successfully!");
         });
-
         loadButton.addActionListener(e -> {
             deck.loadFromFile("flashcards.txt");
-            if (deck.getCards().isEmpty()) {
-                JOptionPane.showMessageDialog(null, "No flashcards found to load.");
-            } else {
-                JOptionPane.showMessageDialog(null, "Flashcards loaded successfully.");
-                showFlashcards();
-            }
+            JOptionPane.showMessageDialog(null, "Flashcards loaded successfully!");
+            showFlashcards();  // Show loaded flashcards right after loading
         });
 
         frame.add(addButton);
@@ -61,18 +56,14 @@ public class MainAppGUI {
         if (result == JOptionPane.OK_OPTION) {
             String question = questionField.getText();
             String answer = answerField.getText();
-            if (!question.isEmpty() && !answer.isEmpty()) {
-                Flashcard card = new Flashcard(question, answer);
-                deck.addCard(card);
-            } else {
-                JOptionPane.showMessageDialog(null, "Both question and answer must be filled.");
-            }
+            Flashcard card = new Flashcard(question, answer);
+            deck.addCard(card);
         }
     }
 
     private void showFlashcards() {
         if (deck.getCards().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "No flashcards available.");
+            JOptionPane.showMessageDialog(null, "No flashcards to display.");
             return;
         }
 
