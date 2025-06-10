@@ -32,8 +32,8 @@ public class FlashcardDeck {
     try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
         String line;
         while ((line = reader.readLine()) != null) {
-            System.out.println("READ LINE: " + line); // debug
-            String[] parts = line.split(",", 2); // only split on the first comma
+            System.out.println("READ LINE: " + line);
+            String[] parts = line.split(",", 2); 
             if (parts.length == 2) {
                 Flashcard card = new Flashcard(parts[0].trim(), parts[1].trim());
                 flashcards.add(card);
