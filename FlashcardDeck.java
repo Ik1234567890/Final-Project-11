@@ -12,12 +12,6 @@ public class FlashcardDeck {
         flashcards.add(card);
     }
 
-    public void removeCard(int index) {
-        if (index >= 0 && index < flashcards.size()) {
-            flashcards.remove(index);
-        }
-    }
-
     public ArrayList<Flashcard> getCards() {
         return flashcards;
     }
@@ -25,8 +19,7 @@ public class FlashcardDeck {
     public void saveToFile(String filename) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             for (Flashcard card : flashcards) {
-                // Save question and answer separated by a tab character
-                writer.write(card.getQuestion() + "\t" + card.getAnswer());
+                writer.write(card.getQuestion() + "," + card.getAnswer());
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -39,9 +32,11 @@ public class FlashcardDeck {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split("\t");
+                String[] parts = line.split(",", 2);
                 if (parts.length == 2) {
-                    Flashcard card = new Flashcard(parts[0], parts[1]);
+                    String question = parts[0].trim();
+                    String answer = parts[1].trim();
+                    Flashcard card = new Flashcard(question, answer);
                     flashcards.add(card);
                 }
             }
