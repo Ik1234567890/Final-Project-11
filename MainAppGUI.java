@@ -29,11 +29,12 @@ public class MainAppGUI {
             JOptionPane.showMessageDialog(null, "Flashcards saved successfully!");
         });
 
-        loadButton.addActionListener(e -> {
-            deck.loadFromFile("flashcards.txt");
-            JOptionPane.showMessageDialog(null, "Flashcards loaded successfully!");
-            showFlashcards(); // Display loaded cards
-        });
+       loadButton.addActionListener(e -> {
+    deck.loadFromFile("flashcards.txt");
+    JOptionPane.showMessageDialog(null, "Flashcards loaded successfully!");
+    showFlashcards(); // to confirm it's working
+});
+
 
         frame.add(addButton);
         frame.add(viewButton);
