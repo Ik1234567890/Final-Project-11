@@ -38,7 +38,7 @@ public class FlashcardDeck {
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
+                String[] parts = line.split(",", 2);
                 if (parts.length == 2) {
                     Flashcard card = new Flashcard(parts[0], parts[1]);
                     flashcards.add(card);
