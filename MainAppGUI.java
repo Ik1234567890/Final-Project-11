@@ -122,21 +122,18 @@ public class MainAppGUI {
         final int[] index = {0};
         final boolean[] showingQuestion = {true};
 
-        // Show the question first
         cardLabel.setText("<html><b>Q:</b> " + deck.getCards().get(index[0]).getQuestion() + "</html>");
 
         nextButton.addActionListener(e -> {
             if (showingQuestion[0]) {
-                // Show answer
                 cardLabel.setText("<html><b>A:</b> " + deck.getCards().get(index[0]).getAnswer() + "</html>");
                 nextButton.setText("Next Card");
                 showingQuestion[0] = false;
             } else {
-                // Move to next card or wrap around
                 index[0]++;
                 if (index[0] >= deck.getCards().size()) {
                     JOptionPane.showMessageDialog(studyFrame, "You have reached the end of the flashcards.", "End", JOptionPane.INFORMATION_MESSAGE);
-                    index[0] = 0; // restart from first card
+                    index[0] = 0;
                 }
                 cardLabel.setText("<html><b>Q:</b> " + deck.getCards().get(index[0]).getQuestion() + "</html>");
                 nextButton.setText("Show Answer");
