@@ -1,30 +1,51 @@
-public class Flashcard {
-    private String question;
-    private String answer;
+import java.util.ArrayList;
+import java.io.*;
 
-    public Flashcard(String question, String answer) {
-        this.question = question;
-        this.answer = answer;
+public class FlashcardDeck {
+    private ArrayList<Flashcard> flashcards;
+
+    public FlashcardDeck() {
+        flashcards = new ArrayList<>();
     }
 
-    public String getQuestion() {
-        return question;
+    public void addCard(Flashcard card) {
+        flashcards.add(card);
     }
 
-    public String getAnswer() {
-        return answer;
+    public void removeCard(int index) {
+        if (index >= 0 && index < flashcards.size()) {
+            flashcards.remove(index);
+        }
     }
 
-    public void setQuestion(String question) {
-        this.question = question;
+    public ArrayList<Flashcard> getCards() {
+        return flashcards;
     }
 
-    public void setAnswer(String answer) {
-        this.answer = answer;
+    public void saveToFile(String filename) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (Flashcard card : flashcards) {
+                writer.write(card.getQuestion() + "," + card.getAnswer());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    @Override
-    public String toString() {
-        return "Q: " + question + "\nA: " + answer;
+    public void loadFromFile(String filename) {
+        flashcards.clear();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 2) {
+                    Flashcard card = new Flashcard(parts[0], parts[1]);
+                    flashcards.add(card);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
