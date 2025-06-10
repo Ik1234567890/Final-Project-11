@@ -23,20 +23,15 @@ public class MainAppGUI {
         addButton.addActionListener(e -> showAddDialog());
         viewButton.addActionListener(e -> showFlashcards());
         saveButton.addActionListener(e -> deck.saveToFile("flashcards.txt"));
-        loadButton.addActionListener(e -> deck.loadFromFile("flashcards.txt"));
+        loadButton.addActionListener(e -> {
+            deck.loadFromFile("flashcards.txt");
+            showFlashcards(); // Show loaded flashcards immediately after loading
+        });
 
         frame.add(addButton);
         frame.add(viewButton);
         frame.add(saveButton);
         frame.add(loadButton);
-
-        // Auto-save flashcards when window is closing
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                deck.saveToFile("flashcards.txt");
-            }
-        });
 
         frame.setVisible(true);
     }
@@ -55,15 +50,10 @@ public class MainAppGUI {
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
         if (result == JOptionPane.OK_OPTION) {
-            String question = questionField.getText().trim();
-            String answer = answerField.getText().trim();
-            if (!question.isEmpty() && !answer.isEmpty()) {
-                Flashcard card = new Flashcard(question, answer);
-                deck.addCard(card);
-            } else {
-                JOptionPane.showMessageDialog(null, "Question and Answer cannot be empty.",
-                        "Input Error", JOptionPane.ERROR_MESSAGE);
-            }
+            String question = questionField.getText();
+            String answer = answerField.getText();
+            Flashcard card = new Flashcard(question, answer);
+            deck.addCard(card);
         }
     }
 
